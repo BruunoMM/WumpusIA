@@ -13,8 +13,10 @@ int main(){
 	gera_mapa();
 	add_agente();
 	for(i=0;i<20;i++){
+		desenhaMapa();
 		acao = pedirAcao();
 		executarAcao(acao);
+		scanf("%*s");
 	}
 	printf("fim\n");
 	return 0;

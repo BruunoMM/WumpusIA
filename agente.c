@@ -11,10 +11,11 @@ void add_agente(){
 	agente.pos.j = 0;
 	agente.orientacao = E;
 	agente.pontos = 0;
+	mapa[0][0].visitado = true;
 }
 
 void grito(){
-	printf("grawwwrrr! A agente acertou alguem. Avisar prolog\n");
+	printf("grawwwrrr! O agente acertou alguem. Avisar prolog\n");
 }
 
 void fimDeJogo(int status){
@@ -39,6 +40,7 @@ void agenteMove(Pos *pos){
 	copyPos(&agente.pos, pos);
 	cell = &mapa[pos->i][pos->j];
 	printf("Agente se move para pos i:%d, j:%d\n", pos->i, pos->j);
+	mapa[pos->i][pos->j].visitado = true;
 	if(cell->wumpus){
 		printf("Agente se move para Wumpus\n");
 		fimDeJogo(LOSE);
