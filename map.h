@@ -2,6 +2,7 @@
 #include <stdbool.h>
 
 #define MAP_SIZE 12
+#define MAX_OURO 3
 #define MAX_POCOS 8
 #define MAX_INIM_20 2
 #define MAX_INIM_50 2
@@ -23,6 +24,8 @@ typedef struct pos {
 	int i;
 	int j;
 } Pos;
+
+Cell mapa[MAP_SIZE][MAP_SIZE];
 
 // Função que gera o mapa de forma aleatória, respeitando todas as regras.
 int gera_mapa();
