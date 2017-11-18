@@ -16,10 +16,10 @@ typedef struct agente{
 	Pos pos;
 	Orientacao orientacao;
 	int pontos;
-} agente;
+} Agente;
 	
 typedef enum acao{
-	MoverFrente; 
+	MoverFrente,
 	VirarDireita,
 	VirarEsquerda,
 	PegarObjeto,
@@ -37,7 +37,7 @@ void grito();
 void fimDeJogo(int status);
 
 //checa por paredes
-int ehParede(Pos &pos);
+int ehParede(Pos *pos);
 //move o agente para a posição indicada por pos
 void agenteMove(Pos *pos);
 
@@ -58,4 +58,4 @@ void avisaProlog();
 
 //tenta executar a ação, retorna se foi possivel ou não.
 //se não for possivel, o agente não executa a ação.
-int executarAcao(Acao acao);
+void executarAcao(Acao acao);

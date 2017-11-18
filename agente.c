@@ -7,9 +7,9 @@
 void add_agente(){
 	agente.vida = 100;
 	agente.municao = 5;
-	agente.i = 0;
-	agente.j = 0;
-	agente.Orientacao = E;
+	agente.pos.i = 0;
+	agente.pos.j = 0;
+	agente.orientacao = E;
 	agente.pontos = 0;
 }
 
@@ -18,7 +18,7 @@ void grito(){
 }
 
 void fimDeJogo(int status){
-	if(status == WIN){
+	if(status == WIN)
 		printf("parabens voce venceu!\n");
 	else
 		printf("Que pena voce morreu..");
@@ -27,7 +27,7 @@ void fimDeJogo(int status){
 }
 
 //checa por paredes.
-int ehParede(Pos &pos){
+int ehParede(Pos *pos){
 	return pos->i <0 || pos->j<0 || pos->i > MAP_SIZE || pos->j> MAP_SIZE;
 	
 }
@@ -38,30 +38,22 @@ void agenteMove(Pos *pos){
 	int ataque;
 	copyPos(&agente.pos, pos);
 	cell = &mapa[pos->i][pos->j];
-	#ifdef _DEBUG
-		printf("Agente se move para pos i:%d, j:%d\n", pos->i, pos->j);
-	#endif
+	printf("Agente se move para pos i:%d, j:%d\n", pos->i, pos->j);
 	if(cell->wumpus){
-		#ifdef _DEBUG
-			printf("Agente se move para Wumpus\n");
-		#endif
-		fimDeJogo(LOSE)
-		return -1;
+		printf("Agente se move para Wumpus\n");
+		fimDeJogo(LOSE);
+		return;
 	}	
 	if(cell->inimigo){
 		ataque = cell->inimigo->ataque;
 		agente.vida -= ataque;
 		agente.pontos -= ataque;
+		printf("Agente se move para Inimigo, %d de dano\n", ataque);
 		if(agente.vida<=0)
 			fimDeJogo(LOSE);
-		#ifdef _DEBUG
-			printf("Agente se move para Inimigo, %d de dano\n", ataque);
-		#endif
 	}
-	if(poco){
-		#ifdef _DEBUG
-			printf("Agente cai no poco\n");
-		#endif
+	if(cell->poco){
+		printf("Agente cai no poco\n");
 		agente.pontos -= 1000;
 	}
 	avisaProlog();
@@ -83,6 +75,7 @@ void posNaFrente(Pos *pos){
 	case W:
 		pos->j+=1;
 		break;
+	}
 }
 
 //atira flecha a partir da posição do agente, verifica cada cell em linha reta, seguindo a aorientação do agente.
@@ -90,15 +83,15 @@ void posNaFrente(Pos *pos){
 void atirarFlecha(){
 	Pos posFlecha;
 	Cell *cell;
-	if(agente->municao<=0){
+	if(agente.municao<=0){
 		printf("agente nao possui flechas\n");
 		return;
 	}
-	agente->municao-=1;
-	copyPos(&posFlecha, &agente->pos);
+	agente.municao-=1;
+	copyPos(&posFlecha, &agente.pos);
 	while(!ehParede(&posFlecha)){
 		printf("Flecha em i:%d,j:%d.\n", posFlecha.i, posFlecha.j);
-		cell = &mapa[posFlecha.i][posFlecha.j]
+		cell = &mapa[posFlecha.i][posFlecha.j];
 		if(cell->inimigo){
 			cell->inimigo->vida -= (rand()%31)+20;
 			grito();
@@ -127,15 +120,19 @@ void avisaProlog(){
 
 //tenta executar a ação, retorna se foi possivel ou não.
 //se não for possivel, o agente não executa a ação.
-int executarAcao(Acao acao){
+void executarAcao(Acao acao){
 	Pos pos;
-	agente.pontuacao -= 1;
+	agente.pontos -= 1;
 	switch(acao){
 		case MoverFrente:
-			copyPos(pos, posDoAgente());
+			copyPos(&pos, &agente.pos);
 			posNaFrente(&pos);
-			if(ehParede(pos)) return PAREDE;
-			agenteMove(pos);
+			if(ehParede(&pos)) {
+				printf("Agente tentando se moveu para uma parede");
+				//TODO avisa prolog
+				return;
+			}
+			agenteMove(&pos);
 			break;
 		case VirarDireita:
 			printf("movendo agente para a direita de %d\n", agente.orientacao);
@@ -150,7 +147,7 @@ int executarAcao(Acao acao){
 		case PegarObjeto:
 			printf("agente tentando pegar ouro pontos:%d\n", agente.pontos);
 			if(isGold(agente.pos)){				
-				agente.pontuacao += 1000;
+				agente.pontos += 1000;
 				printf("agente pegou ouro pontos:%d\n", agente.pontos);
 			}
 			else
@@ -168,10 +165,10 @@ int executarAcao(Acao acao){
 			}
 			else
 				printf("tentativa de subir em i:%d,j:%d. Nao ha escada aqui\n", agente.pos.i, agente.pos.j);
+			
 			break;
 		default:
 			printf("Acao invalida. Perdeu um ponto a toa\n");
-			return -1;
 			break;
 	}
-};
+}
