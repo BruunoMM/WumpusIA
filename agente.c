@@ -52,6 +52,8 @@ void agenteMove(Pos *pos){
 		ataque = cell->inimigo->ataque;
 		agente.vida -= ataque;
 		agente.pontos -= ataque;
+		if(agente.vida<=0)
+			fimDeJogo(LOSE);
 		#ifdef _DEBUG
 			printf("Agente se move para Inimigo, %d de dano\n", ataque);
 		#endif
@@ -68,7 +70,7 @@ void agenteMove(Pos *pos){
 //soma um aos componentes certos de pos, seguindo a orientacao do agente.
 //Essa função ALTERA o argumento passado
 void posNaFrente(Pos *pos){
-	switch(orientacaoDoAgente()){
+	switch(agente.orientacao){
 	case N:
 		pos->i-=1;
 		break;
@@ -95,12 +97,14 @@ void atirarFlecha(){
 	agente->municao-=1;
 	copyPos(&posFlecha, &agente->pos);
 	while(!ehParede(&posFlecha)){
-		cell = mapa[posFlecha.i][posFlecha.j]
+		printf("Flecha em i:%d,j:%d.\n", posFlecha.i, posFlecha.j);
+		cell = &mapa[posFlecha.i][posFlecha.j]
 		if(cell->inimigo){
 			cell->inimigo->vida -= (rand()%31)+20;
 			grito();
 			break;	
 		}
+		posNaFrente(&posFlecha);
 	}
 }
 
@@ -113,7 +117,9 @@ void copyPos(Pos *dest, Pos *src){
 //pede uma ação para o prolog, retorna como enum
 Acao pedirAcao(){
 	char s[][20] = {"MoverFrente","VirarDireita", "VirarEsquerda", "PegarObjeto", "AtirarFlecha", "Subir"};
-	return (Acao) rand()%6;
+	Acao acao = (Acao) rand()%6;
+	printf("acao escolhida: %s\n", s[acao]);
+	return acao;
 }
 void avisaProlog(){
 	printf("avisando o prolog da situação atual. MENTIRA!! essa funcao nao faz nada\n");
@@ -132,30 +138,39 @@ int executarAcao(Acao acao){
 			agenteMove(pos);
 			break;
 		case VirarDireita:
+			printf("movendo agente para a direita de %d\n", agente.orientacao);
 			agente.orientacao = (agente.orientacao+1)%4;
+			printf("movendo agente para a direita para %d\n", agente.orientacao);
 			break;
 		case VirarEsquerda:
+			printf("movendo agente para a esquerda de %d\n", agente.orientacao);
 			agente.orientacao = (agente.orientacao-1)%4;
+			printf("movendo agente para a esquerda para %d\n", agente.orientacao);
 			break;
 		case PegarObjeto:
-			if(isGold(agente.pos)){
+			printf("agente tentando pegar ouro pontos:%d\n", agente.pontos);
+			if(isGold(agente.pos)){				
 				agente.pontuacao += 1000;
+				printf("agente pegou ouro pontos:%d\n", agente.pontos);
 			}
 			else
 				printf("tentativa de pegar o ouro em i:%d,j:%d. Nao ha ouro aqui\n", agente.pos.i, agente.pos.j);
 			break;
-		case AtirarFlecha:
+		case AtirarFlecha:			
+			printf("agente atirou flecha em i:%d,j:%d\n", agente.pos.i, agente.pos.j);
 			atirarFlecha();
 			break;
 		case Subir:
+			printf("agente tentando subir em i:%d,j:%d\n", agente.pos.i, agente.pos.j);
 			if(agente.pos.i == 0 && agente.pos.j == 0){
+				printf("agente subiu\n");
 				fimDeJogo(WIN);
 			}
 			else
 				printf("tentativa de subir em i:%d,j:%d. Nao ha escada aqui\n", agente.pos.i, agente.pos.j);
 			break;
 		default:
-			printf("Acao invalida");
+			printf("Acao invalida. Perdeu um ponto a toa\n");
 			return -1;
 			break;
 	}
