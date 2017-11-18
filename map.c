@@ -96,7 +96,7 @@ int add_pit() {
 		pos.i = rand() % MAP_SIZE;
 		pos.j = rand() % MAP_SIZE;
 	} while ((((pos.i == 0 && pos.j == 0) || isEnemy(pos))
-		|| isPit(pos) || (((pos.i == 1 && pos.j == 0)
+		|| isPit(pos) || isGold(pos) || (((pos.i == 1 && pos.j == 0)
 			|| (pos.i == 0 && pos.j == 1)) && agentAdj == true))); // escolho novamente, caso o poço caia no espaço inicial do agente, onde ja tenha poço ou onde já tenha wumpus.
 	#ifdef _DEBUG
 	printf("Pocos Posicao: %d\t%d\n", pos.i, pos.j);
@@ -120,7 +120,7 @@ int add_enemy(int tipoInimigo) {
 		pos.i = rand() % MAP_SIZE;
 		pos.j = rand() % MAP_SIZE;
 	} while ((((pos.i == 0 && pos.j == 0) || isEnemy(pos))
-		|| isPit(pos) || (((pos.i == 1 && pos.j == 0)
+		|| isPit(pos) || isGold(pos) || (((pos.i == 1 && pos.j == 0)
 			|| (pos.i == 0 && pos.j == 1)) && agentAdj == true) || (mapa[pos.i][pos.j].inimigo != NULL))); // escolho novamente, caso o poço caia no espaço inicial do agente, onde ja tenha poço, onde já tenha wumpus ou onde ja tenha inimigo.
 	#ifdef _DEBUG
 	printf("Inimigos Posicao: %d\t%d\n", pos.i, pos.j);
