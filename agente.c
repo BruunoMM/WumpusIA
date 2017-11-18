@@ -28,7 +28,7 @@ void fimDeJogo(int status){
 
 //checa por paredes.
 int ehParede(Pos *pos){
-	return pos->i <0 || pos->j<0 || pos->i > MAP_SIZE || pos->j> MAP_SIZE;
+	return pos->i <0 || pos->j<0 || pos->i >= MAP_SIZE || pos->j >= MAP_SIZE;
 	
 }
 
@@ -67,13 +67,13 @@ void posNaFrente(Pos *pos){
 		pos->i-=1;
 		break;
 	case E:
-		pos->j-=1;
+		pos->j+=1;
 		break;
 	case S:
 		pos->i+=1;
 		break;
 	case W:
-		pos->j+=1;
+		pos->j-=1;
 		break;
 	}
 }
@@ -128,7 +128,7 @@ void executarAcao(Acao acao){
 			copyPos(&pos, &agente.pos);
 			posNaFrente(&pos);
 			if(ehParede(&pos)) {
-				printf("Agente tentando se moveu para uma parede");
+				printf("Agente tentando se mover para uma parede\n");
 				//TODO avisa prolog
 				return;
 			}
