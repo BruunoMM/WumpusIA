@@ -1,39 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "map.h"
 
 bool agentAdj = false; // se alguma adjacencia do agente possui poço, wumpus ou inimigo.
-Cell mapa[MAP_SIZE][MAP_SIZE];
 
+// função que inicializa todos os campos com false / null
+void inicializaMapa();
+
+// Essa função deve seguir essa ordem de chamada das funções auxiliares para gerar o mapa
+// As funções auxiliares verificam as regras assumindo essa ordem de chamada:
+// Adiciona Ouro -> Adiciona Wumpus -> Adiciona Poços -> Adiciona Inimigos
 int gera_mapa() {
 	int i;
-	add_gold();
-	add_wumpus(mapa); // adiciono o wumpus num local aleatório
+
+	//inicializando o mapa
+	inicializaMapa();
+	//adicionando os ouros
 	i = 0;
-	while (i<MAX_POCOS) {
-		add_pit(mapa); // adiciono um poço.
+	while (i<MAX_OURO){
+		add_gold();
 		i++;
 	}
+	//adicionando o Wumpus
+	add_wumpus();
+	//adicionando poços
+	i = 0;
+	while (i<MAX_POCOS) {
+		add_pit(); // adiciono um poço.
+		i++;
+	}
+	//adicionando inimigos de dano 20
 	i = 0;
 	while (i<MAX_INIM_20) {
 		add_enemy(1);
 		i++;
 	}
+	//adicionando inimigos de dano 50
 	i = 0;
 	while (i < MAX_INIM_50) {
 		add_enemy(2);
 		i++;
 	}
+	#ifdef _DEBUG
+	printf("\n\n");
+	#endif
 	return 0;
 }
 
 int add_gold() {
 	Pos pos;
+
+	srand(time(NULL));
 	do {
 		pos.i = rand() % MAP_SIZE;
 		pos.j = rand() % MAP_SIZE;
-	} while (pos.i == 0 && pos.j == 0); // escolho novamente, caso o ouro caia no espaço inicial do agente.
-
+	} while ((pos.i == 0 && pos.j == 0 ) || isGold(pos)); // escolho novamente, caso o ouro caia no espaço inicial do agente ou onde já tenha ouro.
+	#ifdef _DEBUG
+		printf("Ouro Posicao: %d\t%d\n", pos.i, pos.j);
+	#endif
 	mapa[pos.i][pos.j].brilho = true;
 
 	if ((pos.i == 0 && pos.j == 1) || (pos.i == 1 && pos.j == 0))
@@ -43,11 +68,15 @@ int add_gold() {
 
 int add_wumpus() {
 	Pos pos;
+
+	srand(time(NULL));
 	do {
 		pos.i = rand() % MAP_SIZE;
 		pos.j = rand() % MAP_SIZE;
 	} while ((pos.i == 0 && pos.j == 0) || isGold(pos)); // escolho novamente, caso o wumpus caia no espaço inicial do agente.
-
+	#ifdef _DEBUG
+	printf("Wumpus Posicao: %d\t%d\n", pos.i, pos.j);
+	#endif
 	mapa[pos.i][pos.j].wumpus = true;
 	mapa[pos.i - 1][pos.j].cheiro = true;
 	mapa[pos.i + 1][pos.j].cheiro = true;
@@ -61,13 +90,17 @@ int add_wumpus() {
 
 int add_pit() {
 	Pos pos;
+
+	srand(time(NULL));
 	do {
 		pos.i = rand() % MAP_SIZE;
 		pos.j = rand() % MAP_SIZE;
 	} while ((((pos.i == 0 && pos.j == 0) || isEnemy(pos))
 		|| isPit(pos) || (((pos.i == 1 && pos.j == 0)
 			|| (pos.i == 0 && pos.j == 1)) && agentAdj == true))); // escolho novamente, caso o poço caia no espaço inicial do agente, onde ja tenha poço ou onde já tenha wumpus.
-
+	#ifdef _DEBUG
+	printf("Pocos Posicao: %d\t%d\n", pos.i, pos.j);
+	#endif
 	mapa[pos.i][pos.j].poco = true;
 	mapa[pos.i - 1][pos.j].brisa = true;
 	mapa[pos.i + 1][pos.j].brisa = true;
@@ -81,13 +114,17 @@ int add_pit() {
 
 int add_enemy(int tipoInimigo) {
 	Pos pos;
+
+	srand(time(NULL));
 	do {
 		pos.i = rand() % MAP_SIZE;
 		pos.j = rand() % MAP_SIZE;
 	} while ((((pos.i == 0 && pos.j == 0) || isEnemy(pos))
 		|| isPit(pos) || (((pos.i == 1 && pos.j == 0)
 			|| (pos.i == 0 && pos.j == 1)) && agentAdj == true) || (mapa[pos.i][pos.j].inimigo != NULL))); // escolho novamente, caso o poço caia no espaço inicial do agente, onde ja tenha poço, onde já tenha wumpus ou onde ja tenha inimigo.
-
+	#ifdef _DEBUG
+	printf("Inimigos Posicao: %d\t%d\n", pos.i, pos.j);
+	#endif
 	mapa[pos.i][pos.j].inimigo = (Inimigo*)malloc(sizeof(Inimigo));
 	if (mapa[pos.i][pos.j].inimigo == NULL)
 		return 1; // erro de memoria
@@ -124,4 +161,18 @@ bool isEnemy(Pos pos) {
 	if (mapa[pos.i][pos.j].inimigo || mapa[pos.i][pos.j].wumpus == true)
 		return true;
 	return false;
+}
+
+void inicializaMapa() {
+	int i, j;
+	for (i = 0;i < MAP_SIZE;i++) {
+		for (j = 0;j < MAP_SIZE;j++) {
+			mapa[i][j].wumpus = false;
+			mapa[i][j].cheiro = false;
+			mapa[i][j].brilho = false;
+			mapa[i][j].brisa = false;
+			mapa[i][j].poco = false;
+			mapa[i][j].inimigo = NULL;
+		}
+	}
 }
