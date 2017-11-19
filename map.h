@@ -12,12 +12,13 @@ typedef struct inimigo {
 	int ataque;
 }Inimigo;
 typedef struct cell {
-	Inimigo *inimigo;
+	Inimigo inimigo;
 	bool poco;
 	bool brisa;
 	bool brilho;
 	bool cheiro;
 	bool wumpus;
+	bool visitado;
 }Cell;
 
 typedef struct pos {
@@ -43,3 +44,5 @@ bool isGold(Pos pos);
 bool isPit(Pos pos);
 // Função que diz se existe inimigo/wumpus na referida posição.
 bool isEnemy(Pos pos);
+//desenha o mapa conforme o agente conhece.
+void desenhaMapa();
