@@ -24,7 +24,7 @@ int gera_mapa() {
 		i++;
 	}
 	//adicionando o Wumpus
-	add_wumpus();
+	add_enemy(0);
 	//adicionando poços
 	i = 0;
 	while (i<MAX_POCOS) {
@@ -66,7 +66,7 @@ int add_gold() {
 		agentAdj = true;	// se o wumpus for adicionado num espaço adjacente ao espaço inicial do agente, ja que o agente nao pode ficar preso entre 2 poços.
 	return 0;
 }
-
+/*
 int add_wumpus() {
 	Pos pos;
 
@@ -88,7 +88,7 @@ int add_wumpus() {
 		agentAdj = true;	// se o wumpus for adicionado num espaço adjacente ao espaço inicial do agente, ja que o agente nao pode ficar preso entre 2 poços.
 	return 0;
 }
-
+*/
 int add_pit() {
 	Pos pos;
 
@@ -122,19 +122,23 @@ int add_enemy(int tipoInimigo) {
 		pos.j = rand() % MAP_SIZE;
 	} while ((((pos.i == 0 && pos.j == 0) || isEnemy(pos))
 		|| isPit(pos) || isGold(pos) || (((pos.i == 1 && pos.j == 0)
-			|| (pos.i == 0 && pos.j == 1)) && agentAdj == true) || (mapa[pos.i][pos.j].inimigo != NULL))); // escolho novamente, caso o poço caia no espaço inicial do agente, onde ja tenha poço, onde já tenha wumpus ou onde ja tenha inimigo.
+			|| (pos.i == 0 && pos.j == 1)) && agentAdj == true) || (mapa[pos.i][pos.j].inimigo.ataque > 0))); // escolho novamente, caso o poço caia no espaço inicial do agente, onde ja tenha poço, onde já tenha wumpus ou onde ja tenha inimigo.
 	#ifdef _DEBUG
 		printf("Inimigos Posicao: %d\t%d\n", pos.i, pos.j);
 	#endif
-	mapa[pos.i][pos.j].inimigo = (Inimigo*)malloc(sizeof(Inimigo));
-	if (mapa[pos.i][pos.j].inimigo == NULL)
-		return 1; // erro de memoria
-	if (tipoInimigo == 1)
-		mapa[pos.i][pos.j].inimigo->ataque = 20;	// inimigo 1
-	else
-		mapa[pos.i][pos.j].inimigo->ataque = 50;	// inimigo 2
+	//mapa[pos.i][pos.j].inimigo = (Inimigo*)malloc(sizeof(Inimigo));
+	//if (mapa[pos.i][pos.j].inimigo == NULL)
+	//	return 1; // erro de memoria
+	if (tipoInimigo == 0){
+		mapa[pos.i][pos.j].inimigo.ataque = 1000;	// wumpus
+		mapa[pos.i][pos.j].wumpus = true;
+	}
+	else if (tipoInimigo == 1)
+		mapa[pos.i][pos.j].inimigo.ataque = 20;	// inimigo 1
+	else if(tipoInimigo == 2)
+		mapa[pos.i][pos.j].inimigo.ataque = 50;	// inimigo 2
 
-	mapa[pos.i][pos.j].inimigo->vida = 100;
+	mapa[pos.i][pos.j].inimigo.vida = 100;
 
 	mapa[pos.i - 1][pos.j].cheiro = true;
 	mapa[pos.i + 1][pos.j].cheiro = true;
@@ -159,7 +163,7 @@ bool isPit(Pos pos) {
 }
 
 bool isEnemy(Pos pos) {
-	if (mapa[pos.i][pos.j].inimigo || mapa[pos.i][pos.j].wumpus == true)
+	if (mapa[pos.i][pos.j].inimigo.vida>0 || mapa[pos.i][pos.j].wumpus == true)
 		return true;
 	return false;
 }
@@ -174,7 +178,8 @@ void inicializaMapa() {
 			mapa[i][j].brisa = false;
 			mapa[i][j].poco = false;
 			mapa[i][j].visitado = false;
-			mapa[i][j].inimigo = NULL;
+			mapa[i][j].inimigo.ataque = 0;
+			mapa[i][j].inimigo.vida = 0;
 		}
 	}
 }
@@ -182,6 +187,7 @@ void inicializaMapa() {
 
 void desenhaMapa(){	
 	int i, e;
+	char agenteNoMapa[] = "^>V<";
 	printf("/");
 	for(i=0;i<MAP_SIZE-1;i++)
 		printf("--------");
@@ -193,7 +199,7 @@ void desenhaMapa(){
 				printf("???????");
 			else{
 				if(i == agente.pos.i && e ==agente.pos.j)
-					printf("*");
+					printf("%c", agenteNoMapa[agente.orientacao]);
 				else printf(" ");
 				if(mapa[i][e].wumpus)
 					printf("W");
@@ -210,9 +216,9 @@ void desenhaMapa(){
 				if(mapa[i][e].poco)
 					printf("P");
 				else printf(" ");
-				if(mapa[i][e].inimigo && mapa[i][e].inimigo->ataque == 20)
+				if(mapa[i][e].inimigo.ataque && mapa[i][e].inimigo.ataque == 20)
 					printf("A");
-				if(mapa[i][e].inimigo && mapa[i][e].inimigo->ataque == 50)
+				if(mapa[i][e].inimigo.ataque && mapa[i][e].inimigo.ataque == 50)
 					printf("B");
 				else printf(" ");
 			}

@@ -46,8 +46,8 @@ void agenteMove(Pos *pos){
 		fimDeJogo(LOSE);
 		return;
 	}	
-	if(cell->inimigo){
-		ataque = cell->inimigo->ataque;
+	if(cell->inimigo.vida>0){
+		ataque = cell->inimigo.ataque;
 		agente.vida -= ataque;
 		agente.pontos -= ataque;
 		printf("Agente se move para Inimigo, %d de dano\n", ataque);
@@ -80,10 +80,43 @@ void posNaFrente(Pos *pos){
 	}
 }
 
+//Se um inimigo for abatido, o cheiro dele precisa desaparacer dos arredores.
+//Essa função checa se ao redor de pos ainda tem algum inimigo, se não houver mais nenhum, ela cessa o cheiro nessa posição.
+//essa posição deve ser chamada nas quatro posições adjacentes a um inimigo recem abatido
+void checaCheiro(Pos *pos){
+	Pos posCheca;
+	if(ehParede(pos)) return;
+	copyPos(&posCheca, pos);
+	mapa[pos->i][pos->j].cheiro = false;
+	posCheca.i+=1;
+	if(!ehParede(&posCheca) && isEnemy(posCheca)){
+		mapa[pos->i][pos->j].cheiro = true;
+		return;
+	}
+	copyPos(&posCheca, pos);
+	posCheca.j+=1;
+	if(!ehParede(&posCheca) && isEnemy(posCheca)){
+		mapa[pos->i][pos->j].cheiro = true;
+		return;
+	}
+	copyPos(&posCheca, pos);
+	posCheca.i-=1;
+	if(!ehParede(&posCheca) && isEnemy(posCheca)){
+		mapa[pos->i][pos->j].cheiro = true;
+		return;
+	}
+	copyPos(&posCheca, pos);
+	posCheca.j-=1;
+	if(!ehParede(&posCheca) && isEnemy(posCheca))
+		mapa[pos->i][pos->j].cheiro = true;
+}
+
 //atira flecha a partir da posição do agente, verifica cada cell em linha reta, seguindo a aorientação do agente.
 //para ao encontrar ou um inimigo, ou uma parede
 void atirarFlecha(){
+	Pos posCheca;
 	Pos posFlecha;
+	int danoFlecha;
 	Cell *cell;
 	if(agente.municao<=0){
 		printf("agente nao possui flechas\n");
@@ -94,8 +127,29 @@ void atirarFlecha(){
 	while(!ehParede(&posFlecha)){
 		printf("Flecha em i:%d,j:%d.\n", posFlecha.i, posFlecha.j);
 		cell = &mapa[posFlecha.i][posFlecha.j];
-		if(cell->inimigo){
-			cell->inimigo->vida -= (rand()%31)+20;
+		if(cell->inimigo.vida>0){
+			danoFlecha = (rand()%31)+20;
+			cell->inimigo.vida -= danoFlecha;
+			printf("inimigo sofre dano de %d pontos. Agora lhe restam %d\n", danoFlecha, cell->inimigo.vida);
+			if(cell->inimigo.vida<=0){
+				
+				copyPos(&posCheca, &posFlecha);
+				posCheca.i+=1;
+				checaCheiro(&posCheca);
+
+				copyPos(&posCheca, &posFlecha);
+				posCheca.j+=1;
+				checaCheiro(&posCheca);
+
+				copyPos(&posCheca, &posFlecha);
+				posCheca.i-=1;
+				checaCheiro(&posCheca);
+
+				copyPos(&posCheca, &posFlecha);
+				posCheca.j-=1;
+				checaCheiro(&posCheca);
+			}
+	
 			grito();
 			break;	
 		}
@@ -111,8 +165,14 @@ void copyPos(Pos *dest, Pos *src){
 
 //pede uma ação para o prolog, retorna como enum
 Acao pedirAcao(){
+	char le[81];
 	char s[][20] = {"MoverFrente","VirarDireita", "VirarEsquerda", "PegarObjeto", "AtirarFlecha", "Subir"};
-	Acao acao = (Acao) rand()%6;
+	Acao acao;
+	int i;
+	for(i=0;i<6;i++)
+		printf("deseja: %s ? Digite %d\n",s[i],i);
+	scanf("%s", le);
+	acao = (Acao	) atoi(le);
 	printf("acao escolhida: %s\n", s[acao]);
 	return acao;
 }
