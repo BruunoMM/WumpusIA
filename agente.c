@@ -210,6 +210,7 @@ void executarAcao(Acao acao){
 			printf("agente tentando pegar ouro pontos:%d\n", agente.pontos);
 			if(isGold(agente.pos)){				
 				agente.pontos += 1000;
+				mapa[agente.pos.i][agente.pos.j].brilho = false;
 				printf("agente pegou ouro pontos:%d\n", agente.pontos);
 			}
 			else
