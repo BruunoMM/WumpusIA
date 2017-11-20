@@ -1,7 +1,8 @@
 :- dynamic cheiro/2.
 :- dynamic visitado/2.
 :- dynamic percepcao/7.
-:- dynamic agentePos/2.
+:- dynamic ehParede/2.
+:- dynamic emFrente/2.
 
 start :-
 	format("testando start", []).
@@ -44,8 +45,6 @@ enemy(I,J) :-
 
 % poco, brisa, brilho, cheiro, wumpus - note que estou chamando de 'wumpus', mas na verdade é qualquer inimigo
 move(I, J, Poco, Brisa, Brilho, Cheiro, Wumpus) :- 
-	retract(agentePos(_,_)),
-	assert(agentePos(I,J)),
 	assert(visitado(I,J)),
 	assert(percepcao(I, J, Poco, Brisa, Brilho, Cheiro, Wumpus)).
 
@@ -84,8 +83,43 @@ Mesmo não sabendo onde começou no mapa, o agente assume que começou em 0,0. P
 
 */
 
+emPerigo(I,J) :-
+	brisa(I,J);
+	cheiro(I,J).
+
+updateFrente(I,J,O) :- 
+		(O = 0 -> format("O = 0",[]), J2 = J, I2 is I-1;
+		O = 1 -> format("O = 1",[]), I2 = I, J2 is J+1;
+		O = 2 -> format("O = 2",[]), J2 = J, I2 is I+1;
+		O = 3 -> format("O = 3",[]), I2 = I, J2 is J-1),
+		retractall(frente(_,_)),
+		assert(frente(I2,J2)).
+
+/*
+
+MoverFrente,
+VirarDireita,
+VirarEsquerda,
+PegarObjeto,
+AtirarFlecha,
+Subir
+*/
 
 %transformar isso em escolher proxima acao
-melhorAcao(I, J, X) :-
-	brilho(I,J) -> (format("melhor acao pegar", []), X=3);
-	brisa(I,J) -> format("melhor acao voltar", [], X=2).
+%I,J posicao na matriz
+%O orientaçao
+%X acao retornada
+
+melhorAcao(I, J, O, X) :-
+	updateFrente(I,J,O),
+	emFrente(I2,J2),
+	brilho(I,J) -> format("melhor acao pegar", []), X=3;
+	emPerigo(I,J) -> ( % caso em perigo, ir para lugar conhecido
+		visitado(I2,J2) -> format("melhor acao avancar", []), X=0; %se na frente for conhecido, ir para frente
+		format("melhor acao virar direita", []), X=1
+	);
+	\+ emPerigo(I,J) -> (	% nao esta em perigo, melhor acao avancar para lugar desconhecido.
+		 visitado(I2,J2) ; ehParede(I2,J2) -> format("melhor acao virar direita", []), X=1;
+		 format("melhor acao avancar ", X=0)
+	).
+
