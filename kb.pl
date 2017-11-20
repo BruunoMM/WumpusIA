@@ -77,14 +77,15 @@ caso nao esteja em perigo ir para lugar desconhecido. Desbravando!
 
 Se certeza de inimigo, flecha nele.
 
-contar distancia desde a origem (distancia em I e J mesmo), se tiver duas ou tres barras de ouro retornar para ela. Isso é, tentar diminuir a distancia.
-se tiver pouca vida retornar para ela.
+Contar distancia desde a origem (distancia em I e J mesmo), se tiver duas ou tres barras de ouro retornar para ela. Isso é, tentar diminuir a distancia.
+Se tiver pouca vida retornar para ela.
+A principio, pensei em fazer variaveis que contariam a distancia ate a origem, como se o agente soubesse de que direção ele veio, e que distancia percorreu. Mas percebi que essas variaveis seriam redundantes, ja que o agente começa no 0,0 e a distancia dele, é a propria coordenada.
+Mesmo não sabendo onde começou no mapa, o agente assume que começou em 0,0. Para ele essa é a origem, e a posição dele em I,J é a mesma distancia da origem. Isso ajuda a simplificar as coisas. E não quebra as regras. É so uma mudança de referencial
 
-asdasd
 */
 
 
 %transformar isso em escolher proxima acao
-teste(I, J, X) :-
+melhorAcao(I, J, X) :-
 	brilho(I,J) -> (format("melhor acao pegar", []), X=3);
 	brisa(I,J) -> format("melhor acao voltar", [], X=2).
