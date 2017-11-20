@@ -63,9 +63,26 @@ adjacente(I,J,I2,J2) :-
 visitado(3,4).
 visitado(3,5).
 visitado(3,6).
-percepcao(3,5,0,0,1,0,0).
+percepcao(3,4,0,0,1,0,0).
 percepcao(3,5,0,1,0,0,0).
 percepcao(3,6,0,1,1,0,0).
+
+/*
+alguns algoritmos para determinar melhor acao
+se brilho -> pegar
+se nenhum perigo avancar
+se encontrou parede virar para a direita
+se em perigo voltar para local conhecido. Com "em perigo", quero dizer do lado de uma brisa ou inimigo.
+caso nao esteja em perigo ir para lugar desconhecido. Desbravando!
+
+Se certeza de inimigo, flecha nele.
+
+contar distancia desde a origem (distancia em I e J mesmo), se tiver duas ou tres barras de ouro retornar para ela. Isso é, tentar diminuir a distancia.
+se tiver pouca vida retornar para ela.
+
+asdasd
+*/
+
 
 %transformar isso em escolher proxima acao
 teste(I, J, X) :-
