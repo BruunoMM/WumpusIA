@@ -221,7 +221,6 @@ Acao pedirAcao(){
 	return acao;
 }
 void avisaProlog(Pos pos){
-	printf("avisando o prolog da situação atual.\n");
 	predicate_t p;
 	term_t t0;
 	term_t t;
@@ -230,28 +229,36 @@ void avisaProlog(Pos pos){
 	int rval;
 	Cell *cell;
 
+	printf("avisando o prolog da situação atual.\n");
 	cell = &mapa[pos.i][pos.j];
 
 	t0 = PL_new_term_refs(7);
 	p = PL_predicate("move",7,"user");
 	t = t0;
-
 	sprintf(arg, "%d", pos.i);
+	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
 	sprintf(arg, "%d", pos.j);	
+	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
 	sprintf(arg, "%d", cell->poco?1:0);	
+	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
 	sprintf(arg, "%d", cell->brisa?1:0);	
+	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
 	sprintf(arg, "%d", cell->brilho?1:0);	
+	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
 	sprintf(arg, "%d", cell->cheiro?1:0);	
+	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
 	sprintf(arg, "%d", cell->wumpus?1:0);	
+	printf("%s - ", arg);
 	PL_put_atom_chars(t, arg);
 
 	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t0);
+	rval = PL_next_solution(qid);
 	PL_cut_query(qid);
 }
 
@@ -268,6 +275,7 @@ void chamaProlog(char func[], Pos pos){
 	sprintf(arg, "%d", pos.j);
 	PL_put_atom_chars(t+1, arg);
 	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t);
+	rval = PL_next_solution(qid);
 	PL_cut_query(qid);
 }
 

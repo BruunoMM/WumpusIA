@@ -41,14 +41,17 @@ enemy(I,J) :-
 
 % poco, brisa, brilho, cheiro, wumpus - note que estou chamando de 'wumpus', mas na verdade é qualquer inimigo
 move(I, J, Poco, Brisa, Brilho, Cheiro, Wumpus) :-
-	format("move li do c i:~p, j:~p, [~p,~p,~p,~p,~p]", [I,J, Poco, Brisa, Brilho, Cheiro, Wumpus]),
-	assert(visitado(I,J)),
-	assert(percepcao(I, J, Poco, Brisa, Brilho, Cheiro, Wumpus)).
+	format("move li do c i:~p, j:~p, [~p,~p,~p,~p,~p]~n", [I,J, Poco, Brisa, Brilho, Cheiro, Wumpus]),
+	\+ visitado(I,J) -> (
+		assert(visitado(I,J)),
+		assert(percepcao(I, J, Poco, Brisa, Brilho, Cheiro, Wumpus))
+	).
 
 %chamada pelo c para adicionar uma posicao como parede
 addParede(I,J) :-
 	format("parede li do c i:~p, j:~p~n", [I,J]),
-	assert(ehParede(I,J)).
+	\+ ehParede(I,J) ->
+		assert(ehParede(I,J)).
 
 %chamada pelo c para avisar que em uma determinada posição não existe mais ouro.
 removeOuro(I,J):-
@@ -124,14 +127,18 @@ melhorAcao(I,J,O,X):-
 	X = 37.
 */
 melhorAcao(I, J, O, X) :-
+	format("melhorAcaoA li do c i:~p j:~p O:~p~n", [I, J, O]),
+	emFrente(I,J,O,A,B), format("melhorAcaoB I:~p J:~p~n", [A,B]),
 	brilho(I,J) -> format("melhor acao pegar", []), X=3;
+	emFrente(I,J,O,A,B), ehParede(A,B) -> % caso logo a frente esteja uma parede, virar para a direita
+		format("melhor acao virar direita", []), X=1;
 	emFrente(I,J,O,A,B), visitado(A,B), emPerigo(I,J) ->  % caso em perigo, ir para lugar conhecido
 		format("melhor acao avancar", []), X=0; % se na frente for conhecido, ir para frente
 	emFrente(I,J,O,A,B), \+ visitado(A,B), emPerigo(I,J)  -> %se na frente não é conhecido, virar a direita.
 		format("melhor acao virar direita", []), X=1;
-	emFrente(I,J,O,A,B), \+ emPerigo(I,J), (visitado(A,B) ; ehParede(A,B)) -> % nao esta em perigo, melhor acao avancar para lugar desconhecido.
+	emFrente(I,J,O,A,B), \+ emPerigo(I,J), visitado(A,B) -> % nao esta em perigo, melhor acao avancar para lugar desconhecido.
 		format("melhor acao virar direita", []), X=1; % vira a direita se a frente ja for conhecido.
-	emFrente(I,J,O,A,B), \+ emPerigo(I,J), \+ visitado(A,B) , \+ ehParede(A,B) -> %nao esta em perigo, prioridade é desbravar o desconhecido
-		format("melhor acao avancar ", X=0);
+	emFrente(I,J,O,A,B), \+ emPerigo(I,J), \+ visitado(A,B) -> % nao esta em perigo, prioridade é desbravar o desconhecido
+		format("melhor acao avancar "), X=0;
 	format("do nothing", []), X=0.
 
