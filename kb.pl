@@ -41,7 +41,7 @@ enemy(I,J) :-
 
 % poco, brisa, brilho, cheiro, wumpus - note que estou chamando de 'wumpus', mas na verdade é qualquer inimigo
 move(I, J, Poco, Brisa, Brilho, Cheiro, Wumpus) :-
-	format("move li do c i:~p, j:~p~n, [~p,~p,~p,~p,~p]", [I,J, Poco, Brisa, Brilho, Cheiro, Wumpus]),
+	format("move li do c i:~p, j:~p, [~p,~p,~p,~p,~p]", [I,J, Poco, Brisa, Brilho, Cheiro, Wumpus]),
 	assert(visitado(I,J)),
 	assert(percepcao(I, J, Poco, Brisa, Brilho, Cheiro, Wumpus)).
 
@@ -53,7 +53,7 @@ addParede(I,J) :-
 %chamada pelo c para avisar que em uma determinada posição não existe mais ouro.
 removeOuro(I,J):-
 	format("removeOuro li do c i:~p, j:~p~n", [I,J]),
-	percepcao(I, J, Poco, Brisa, Brilho, Cheiro, Wumpus),
+	percepcao(I, J, Poco, Brisa, _, Cheiro, Wumpus),
 	retractall(percepcao(I, J, _,_,_,_,_)),
 	assert(percepcao(I, J, Poco, Brisa, 0, Cheiro, Wumpus)).
 	

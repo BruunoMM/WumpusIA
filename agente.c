@@ -249,9 +249,9 @@ void avisaProlog(Pos pos){
 	sprintf(arg, "%d", cell->cheiro?1:0);	
 	PL_put_atom_chars(t++, arg);
 	sprintf(arg, "%d", cell->wumpus?1:0);	
-	PL_put_atom_chars(t++, arg);
+	PL_put_atom_chars(t, arg);
 
-	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t);
+	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t0);
 	PL_cut_query(qid);
 }
 
