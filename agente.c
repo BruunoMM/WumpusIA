@@ -13,6 +13,7 @@ void add_agente(){
 	agente.orientacao = E;
 	agente.pontos = 0;
 	mapa[0][0].visitado = true;
+	avisaProlog(agente.pos);
 }
 
 void grito(){
@@ -58,7 +59,7 @@ void agenteMove(Pos *pos){
 		printf("Agente cai no poco\n");
 		agente.pontos -= 1000;
 	}
-	avisaProlog();
+	avisaProlog(*pos);
 }
 
 //soma um aos componentes certos de pos, seguindo a orientacao do agente.
@@ -186,7 +187,7 @@ Acao pedirAcao(){
 	int i;
 	int returnInteger=0;
 
-	
+	// versão AI	
 
 	p = PL_predicate("melhorAcao", 4, "user");
 	t = PL_new_term_refs(4);
@@ -203,51 +204,9 @@ Acao pedirAcao(){
 	rval = PL_get_integer(termoAcao, &returnInteger);
 	Sprintf("valorInt:%d\n", returnInteger);
 	acao = (Acao) returnInteger;
-	/*
-	do{
-		for(i=0;i<4;i++){
-			printf("i:%d\n", i);
-			printf("rvalA:%d\n", rval);
-			termoAcao = t+i;
-			if(PL_is_atom(termoAcao)){
-				puts("atom---\n");
-				rval = PL_get_atom_chars(termoAcao, &returnString);		
-			}
-			else if(PL_is_string(termoAcao)){
-				puts("string---\n");
-				rval = PL_get_string_chars(termoAcao, &returnString, &tam);				
-			}
-			else if(PL_is_variable(termoAcao)){
-				puts("variavel---\n");
-				rval = PL_get_chars(termoAcao, &returnString, CVT_ALL);
-			}
-			else if(PL_is_integer(termoAcao)){
-				puts("inteiro---\n");
-				rval = PL_get_integer(termoAcao, &returnInteger);
-				Sprintf("valorInt:%d\n", returnInteger);
-			}
-			else{
-				Sprintf("tipo: %d\n", PL_term_type(termoAcao));
-			}
-			printf("rvalA:%d\n", rval);
-			Sprintf("valor:%s\n", returnString);
-		}
-	}while(PL_next_solution(qid));
-/*
-	if(PL_is_variable(t+3)){
-		printf("variavel\n");
-		rval = PL_get_chars(termoAcao, &returnString, CVT_ALL);
-		
-		//rval = PL_get_atom_chars(termoAcao, &returnString);
-		Sprintf("string:%s\n", returnString);
-		Sprintf("rval:%d", rval);
-	}else Sprintf("tipo: %d\n", PL_term_type(t+3));
-
-*/
 	Sprintf("A melhor solucao lida do prolog e: %d\n", returnInteger);
 	PL_cut_query(qid);
 	
-	//acao = (Acao) 0;
 
 	/* versão jogavel------------------------
 	char le[81];
@@ -257,13 +216,67 @@ Acao pedirAcao(){
 	scanf("%s", le);
 	acao = (Acao	) atoi(le);
 	*/
-	// versão AI
 	
 	printf("acao escolhida: %s\n", s[acao]);
 	return acao;
 }
-void avisaProlog(){
-	printf("avisando o prolog da situação atual. MENTIRA!! essa funcao nao faz nada\n");
+void avisaProlog(Pos pos){
+	printf("avisando o prolog da situação atual.\n");
+	predicate_t p;
+	term_t t0;
+	term_t t;
+	char arg[81];
+	int qid;
+	int rval;
+	Cell *cell;
+
+	cell = &mapa[pos.i][pos.j];
+
+	t0 = PL_new_term_refs(7);
+	p = PL_predicate("move",7,"user");
+	t = t0;
+
+	sprintf(arg, "%d", pos.i);
+	PL_put_atom_chars(t++, arg);
+	sprintf(arg, "%d", pos.j);	
+	PL_put_atom_chars(t++, arg);
+	sprintf(arg, "%d", cell->poco?1:0);	
+	PL_put_atom_chars(t++, arg);
+	sprintf(arg, "%d", cell->brisa?1:0);	
+	PL_put_atom_chars(t++, arg);
+	sprintf(arg, "%d", cell->brilho?1:0);	
+	PL_put_atom_chars(t++, arg);
+	sprintf(arg, "%d", cell->cheiro?1:0);	
+	PL_put_atom_chars(t++, arg);
+	sprintf(arg, "%d", cell->wumpus?1:0);	
+	PL_put_atom_chars(t++, arg);
+
+	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t);
+	PL_cut_query(qid);
+}
+
+void chamaProlog(char func[], Pos pos){
+	predicate_t p;
+	term_t t;
+	char arg[81];
+	int qid;
+	int rval;
+	t = PL_new_term_refs(2);
+	p = PL_predicate(func,2,"user");
+	sprintf(arg, "%d", pos.i);
+	PL_put_atom_chars(t, arg);
+	sprintf(arg, "%d", pos.j);
+	PL_put_atom_chars(t+1, arg);
+	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t);
+	PL_cut_query(qid);
+}
+
+void addParede(Pos pos){
+	chamaProlog("addParede", pos);
+}
+
+void removeOuro(Pos pos){
+	chamaProlog("removeOuro", pos);
 }
 
 //tenta executar a ação, retorna se foi possivel ou não.
@@ -277,7 +290,7 @@ void executarAcao(Acao acao){
 			posNaFrente(&pos);
 			if(ehParede(&pos)) {
 				printf("Agente tentando se mover para uma parede\n");
-				//TODO avisa prolog
+				addParede(pos);
 				return;
 			}
 			agenteMove(&pos);
@@ -298,6 +311,7 @@ void executarAcao(Acao acao){
 				agente.pontos += 1000;
 				mapa[agente.pos.i][agente.pos.j].brilho = false;
 				printf("agente pegou ouro pontos:%d\n", agente.pontos);
+				removeOuro(agente.pos);
 			}
 			else
 				printf("tentativa de pegar o ouro em i:%d,j:%d. Nao ha ouro aqui\n", agente.pos.i, agente.pos.j);
