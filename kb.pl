@@ -109,34 +109,18 @@ Subir
 %X acao retornada
 
 
-teste(I, J, O, X) :-
+melhorAcao(I, J, O, X) :-
 	emFrente(I, J, O, A, B),
 	format("A:~p, B:~p~n",[A,B]),
 	(
 		brilho(I,J) -> format("melhor acao pegar", []), X=3;
 		emFrente(A,B), visitado(A,B), emPerigo(I,J) ->  % caso em perigo, ir para lugar conhecido
-			format("melhor acao avancar", []), X=0; %se na frente for conhecido, ir para frente
-		emFrente(A,B), \+ visitado(A,B), emPerigo(I,J)  ->
+			format("melhor acao avancar", []), X=0; % se na frente for conhecido, ir para frente
+		emFrente(A,B), \+ visitado(A,B), emPerigo(I,J)  -> %se na frente não é conhecido, virar a direita.
 			format("melhor acao virar direita", []), X=1;
 		emFrente(A,B), \+ emPerigo(I,J), (visitado(A,B) ; ehParede(A,B)) -> % nao esta em perigo, melhor acao avancar para lugar desconhecido.
-			format("melhor acao virar direita", []), X=1;
-		emFrente(A,B), \+ emPerigo(I,J), \+ visitado(A,B) , \+ ehParede(A,B) ->
+			format("melhor acao virar direita", []), X=1; % vira a direita se a frente ja for conhecido.
+		emFrente(A,B), \+ emPerigo(I,J), \+ visitado(A,B) , \+ ehParede(A,B) -> %nao esta em perigo, prioridade é desbravar o desconhecido
 			format("melhor acao avancar ", X=0);
 		format("do nothing", [])
 	).
-
-
-/*
-melhorAcao(I, J, O, X) :-
-	emFrente(I,J,O,I2,J2),
-	format("i:~p, j:~p", [I2, J2]),
-	brilho(I,J) -> format("melhor acao pegar", []), X=3;
-	emPerigo(I,J) -> ( % caso em perigo, ir para lugar conhecido
-		visitado(I2,J2) -> format("melhor acao avancar", []), X=0; %se na frente for conhecido, ir para frente
-		format("melhor acao virar direita", []), X=1
-	);
-	\+ emPerigo(I,J) -> (	% nao esta em perigo, melhor acao avancar para lugar desconhecido.
-		 visitado(I2,J2) ; ehParede(I2,J2) -> format("melhor acao virar direita", []), X=1;
-		 format("melhor acao avancar ", X=0)
-	).
-*/
