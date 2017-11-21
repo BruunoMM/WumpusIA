@@ -232,7 +232,7 @@ void avisaProlog(Pos pos){
 	t0 = PL_new_term_refs(7);
 	p = PL_predicate("move",7,"user");
 	t = t0;
-	rval = PL_put_integer(t, pos.i);
+	rval = PL_put_integer(t++, pos.i);
 	Sprintf("%d - ", t0);
 
 	rval = PL_put_integer(t++, pos.j);
@@ -251,7 +251,7 @@ void avisaProlog(Pos pos){
 	Sprintf("%d - ", t0+5);
 
 	rval = PL_put_integer(t, cell->wumpus?1:0);
-	Sprintf("%d - ", t0+6);
+	Sprintf("%d\n", t0+6);
 /*
 	sprintf(arg, "%d", pos.i);
 	printf("%s - ", arg);

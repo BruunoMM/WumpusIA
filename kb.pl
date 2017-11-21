@@ -121,7 +121,7 @@ Subir
 %I,J posicao na matriz
 %O orientaçao
 %X acao retornada
-
+/*
 melhorAcao(I,J,O,X):-
 	format("melhorAcaoC li do c:~p,~p,~p~n", [I,J,O]),
 	J=0 -> format("decisaoA~n"), X = 2, true;
@@ -130,9 +130,9 @@ melhorAcao(I,J,O,X):-
 	(I=1, O=2) -> format("decisaoD~n"), X = 2;
 	I=1, O=1 -> format("decisaoE~n"), X = 2;
 	X = 3.
-	
+*/	
 
-/*
+
 melhorAcao(I, J, O, X) :-
 	format("melhorAcaoA li do c i:~p j:~p O:~p~n", [I, J, O]),
 	emFrente(I,J,O,A,B), format("melhorAcaoB I:~p J:~p~n", [A,B]),
@@ -148,4 +148,3 @@ melhorAcao(I, J, O, X) :-
 	emFrente(I,J,O,A,B), \+ emPerigo(I,J), \+ visitado(A,B) -> % nao esta em perigo, prioridade é desbravar o desconhecido
 		format("melhor acao avancar "), X=0;
 	format("do nothing", []), X=0.
-*/
