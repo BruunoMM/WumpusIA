@@ -183,6 +183,9 @@ Acao pedirAcao(){
 	int rval;
 	int qid;
 	size_t tam;
+	int i;
+	int returnInteger=0;
+
 	
 
 	p = PL_predicate("melhorAcao", 4, "user");
@@ -195,23 +198,40 @@ Acao pedirAcao(){
 	PL_put_atom_chars(t+2, arg);
 
 	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t);
+	rval = PL_next_solution(qid);
 	termoAcao = t+3;
+	rval = PL_get_integer(termoAcao, &returnInteger);
+	Sprintf("valorInt:%d\n", returnInteger);
+	acao = (Acao) returnInteger;
+	/*
 	do{
-		printf("rvalA:%d\n", rval);
-		if(PL_is_atom(termoAcao)){
-			puts("atom---\n");
-			rval = PL_get_atom_chars(termoAcao, &returnString);		
+		for(i=0;i<4;i++){
+			printf("i:%d\n", i);
+			printf("rvalA:%d\n", rval);
+			termoAcao = t+i;
+			if(PL_is_atom(termoAcao)){
+				puts("atom---\n");
+				rval = PL_get_atom_chars(termoAcao, &returnString);		
+			}
+			else if(PL_is_string(termoAcao)){
+				puts("string---\n");
+				rval = PL_get_string_chars(termoAcao, &returnString, &tam);				
+			}
+			else if(PL_is_variable(termoAcao)){
+				puts("variavel---\n");
+				rval = PL_get_chars(termoAcao, &returnString, CVT_ALL);
+			}
+			else if(PL_is_integer(termoAcao)){
+				puts("inteiro---\n");
+				rval = PL_get_integer(termoAcao, &returnInteger);
+				Sprintf("valorInt:%d\n", returnInteger);
+			}
+			else{
+				Sprintf("tipo: %d\n", PL_term_type(termoAcao));
+			}
+			printf("rvalA:%d\n", rval);
+			Sprintf("valor:%s\n", returnString);
 		}
-		if(PL_is_string(termoAcao)){
-			puts("string---\n");
-			rval = PL_get_string_chars(termoAcao, &returnString, &tam);				
-		}
-		if(PL_is_variable(termoAcao)){
-			puts("variavel---\n");
-			rval = PL_get_chars(termoAcao, &returnString, CVT_ALL);
-		}
-		printf("rvalA:%d\n", rval);
-		Sprintf("valor:%s\n", returnString);
 	}while(PL_next_solution(qid));
 /*
 	if(PL_is_variable(t+3)){
@@ -224,10 +244,10 @@ Acao pedirAcao(){
 	}else Sprintf("tipo: %d\n", PL_term_type(t+3));
 
 */
-	Sprintf("A melhor solucao lida do prolog e: %s\n", returnString);
+	Sprintf("A melhor solucao lida do prolog e: %d\n", returnInteger);
 	PL_cut_query(qid);
 	
-	acao = (Acao) 0;
+	//acao = (Acao) 0;
 
 	/* versão jogavel------------------------
 	char le[81];
