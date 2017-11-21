@@ -24,9 +24,9 @@ int main(int argc, char *argv[]){
 	while(1){
 		printf("Pontos: %d\n", agente.pontos);
 		desenhaMapa();
+		scanf("%*s");
 		acao = pedirAcao();
 		executarAcao(acao);
-		scanf("%*s");
 	}
 	printf("fim\n");
 	return 0;

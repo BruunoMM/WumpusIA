@@ -191,12 +191,9 @@ Acao pedirAcao(){
 
 	p = PL_predicate("melhorAcao", 4, "user");
 	t = PL_new_term_refs(4);
-	sprintf(arg, "%d", agente.pos.i);
-	PL_put_atom_chars(t, arg);
-	sprintf(arg, "%d", agente.pos.j);
-	PL_put_atom_chars(t+1, arg);
-	sprintf(arg, "%d", agente.orientacao);
-	PL_put_atom_chars(t+2, arg);
+	rval = PL_put_integer(t, agente.pos.i);
+	rval = PL_put_integer(t+1, agente.pos.j);
+	rval = PL_put_integer(t+2, agente.orientacao);
 
 	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t);
 	rval = PL_next_solution(qid);
@@ -224,7 +221,7 @@ void avisaProlog(Pos pos){
 	predicate_t p;
 	term_t t0;
 	term_t t;
-	char arg[81];
+	//char arg[81];
 	int qid;
 	int rval;
 	Cell *cell;
@@ -235,28 +232,55 @@ void avisaProlog(Pos pos){
 	t0 = PL_new_term_refs(7);
 	p = PL_predicate("move",7,"user");
 	t = t0;
+	rval = PL_put_integer(t, pos.i);
+	Sprintf("%d - ", t0);
+
+	rval = PL_put_integer(t++, pos.j);
+	Sprintf("%d - ", t0+1);
+
+	rval = PL_put_integer(t++, cell->poco?1:0);
+	Sprintf("%d - ", t0+2);
+
+	rval = PL_put_integer(t++, cell->brisa?1:0);
+	Sprintf("%d - ", t0+3);
+
+	rval = PL_put_integer(t++, cell->brilho?1:0);
+	Sprintf("%d - ", t0+4);
+
+	rval = PL_put_integer(t++, cell->cheiro?1:0);
+	Sprintf("%d - ", t0+5);
+
+	rval = PL_put_integer(t, cell->wumpus?1:0);
+	Sprintf("%d - ", t0+6);
+/*
 	sprintf(arg, "%d", pos.i);
 	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
+
 	sprintf(arg, "%d", pos.j);	
 	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
+
 	sprintf(arg, "%d", cell->poco?1:0);	
 	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
+
 	sprintf(arg, "%d", cell->brisa?1:0);	
 	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
+
 	sprintf(arg, "%d", cell->brilho?1:0);	
 	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
+
 	sprintf(arg, "%d", cell->cheiro?1:0);	
 	printf("%s - ", arg);
 	PL_put_atom_chars(t++, arg);
+
 	sprintf(arg, "%d", cell->wumpus?1:0);	
 	printf("%s - ", arg);
 	PL_put_atom_chars(t, arg);
-
+*/
 	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t0);
 	rval = PL_next_solution(qid);
 	PL_cut_query(qid);
@@ -265,15 +289,12 @@ void avisaProlog(Pos pos){
 void chamaProlog(char func[], Pos pos){
 	predicate_t p;
 	term_t t;
-	char arg[81];
 	int qid;
 	int rval;
 	t = PL_new_term_refs(2);
 	p = PL_predicate(func,2,"user");
-	sprintf(arg, "%d", pos.i);
-	PL_put_atom_chars(t, arg);
-	sprintf(arg, "%d", pos.j);
-	PL_put_atom_chars(t+1, arg);
+	rval = PL_put_integer(t, pos.i);
+	rval = PL_put_integer(t+1, pos.j);
 	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t);
 	rval = PL_next_solution(qid);
 	PL_cut_query(qid);
