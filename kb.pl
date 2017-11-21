@@ -104,6 +104,10 @@ Subir
 %I,J posicao na matriz
 %O orientaçao
 %X acao retornada
+melhorAcao(I,J,O,X):-
+	format("li do c:~p,~p,~p~n",[I,J,O]),
+	X = 1.
+/*
 melhorAcao(I, J, O, X) :-
 	emFrente(I, J, O, A, B),
 	format("A:~p, B:~p~n",[A,B]),
@@ -119,3 +123,4 @@ melhorAcao(I, J, O, X) :-
 			format("melhor acao avancar ", X=0);
 		format("do nothing", [])
 	).
+*/

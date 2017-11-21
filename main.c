@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
 	args[0] = argv[0];
 	args[1] = NULL;
 	if(!PL_initialise(argc, args)){
-		printf("falha ao inicializar prolog");
+		printf("falha ao inicializar prolog\n");
 		PL_halt(1);
 	}
 	 

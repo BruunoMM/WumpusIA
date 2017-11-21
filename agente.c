@@ -181,6 +181,8 @@ Acao pedirAcao(){
 	term_t t;
 	term_t termoAcao;
 	int rval;
+	int qid;
+	size_t tam;
 	
 
 	p = PL_predicate("melhorAcao", 4, "user");
@@ -192,16 +194,38 @@ Acao pedirAcao(){
 	sprintf(arg, "%d", agente.orientacao);
 	PL_put_atom_chars(t+2, arg);
 
-	//qid = 
-		PL_open_query(NULL, PL_Q_NORMAL, p, t);
-	//rval = PL_next_solution(qid);
+	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t);
 	termoAcao = t+3;
-	if(PL_is_atom(t+3)){
-		rval = PL_get_atom_chars(termoAcao, &returnString);
+	do{
+		printf("rvalA:%d\n", rval);
+		if(PL_is_atom(termoAcao)){
+			puts("atom---\n");
+			rval = PL_get_atom_chars(termoAcao, &returnString);		
+		}
+		if(PL_is_string(termoAcao)){
+			puts("string---\n");
+			rval = PL_get_string_chars(termoAcao, &returnString, &tam);				
+		}
+		if(PL_is_variable(termoAcao)){
+			puts("variavel---\n");
+			rval = PL_get_chars(termoAcao, &returnString, CVT_ALL);
+		}
+		printf("rvalA:%d\n", rval);
+		Sprintf("valor:%s\n", returnString);
+	}while(PL_next_solution(qid));
+/*
+	if(PL_is_variable(t+3)){
+		printf("variavel\n");
+		rval = PL_get_chars(termoAcao, &returnString, CVT_ALL);
+		
+		//rval = PL_get_atom_chars(termoAcao, &returnString);
+		Sprintf("string:%s\n", returnString);
 		Sprintf("rval:%d", rval);
 	}else Sprintf("tipo: %d\n", PL_term_type(t+3));
+
+*/
 	Sprintf("A melhor solucao lida do prolog e: %s\n", returnString);
-	PL_cut_query;
+	PL_cut_query(qid);
 	
 	acao = (Acao) 0;
 
