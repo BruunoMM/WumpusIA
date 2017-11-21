@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <SWI-Prolog.h>
 #include "map.h"
 #include "agente.h"
 
@@ -30,7 +31,6 @@ void fimDeJogo(int status){
 //checa por paredes.
 int ehParede(Pos *pos){
 	return pos->i <0 || pos->j<0 || pos->i >= MAP_SIZE || pos->j >= MAP_SIZE;
-	
 }
 
 //move o agente para a posição indicada por pos
@@ -163,16 +163,58 @@ void copyPos(Pos *dest, Pos *src){
 	dest->j = src->j;
 }
 
+/*
+%escolher proxima acao
+%I,J posicao na matriz
+%O orientaçao
+%X acao retornada
+melhorAcao(I, J, O, X) :-
+*/
+
 //pede uma ação para o prolog, retorna como enum
 Acao pedirAcao(){
-	char le[81];
 	char s[][20] = {"MoverFrente","VirarDireita", "VirarEsquerda", "PegarObjeto", "AtirarFlecha", "Subir"};
+	char *returnString = NULL;
+	char arg[81];
 	Acao acao;
+	predicate_t p;
+	term_t t;
+	term_t termoAcao;
+	int rval;
+	
+
+	p = PL_predicate("melhorAcao", 4, "user");
+	t = PL_new_term_refs(4);
+	sprintf(arg, "%d", agente.pos.i);
+	PL_put_atom_chars(t, arg);
+	sprintf(arg, "%d", agente.pos.j);
+	PL_put_atom_chars(t+1, arg);
+	sprintf(arg, "%d", agente.orientacao);
+	PL_put_atom_chars(t+2, arg);
+
+	//qid = 
+		PL_open_query(NULL, PL_Q_NORMAL, p, t);
+	//rval = PL_next_solution(qid);
+	termoAcao = t+3;
+	if(PL_is_atom(t+3)){
+		rval = PL_get_atom_chars(termoAcao, &returnString);
+		Sprintf("rval:%d", rval);
+	}else Sprintf("tipo: %d\n", PL_term_type(t+3));
+	Sprintf("A melhor solucao lida do prolog e: %s\n", returnString);
+	PL_cut_query;
+	
+	acao = (Acao) 0;
+
+	/* versão jogavel------------------------
+	char le[81];
 	int i;
 	for(i=0;i<6;i++)
 		printf("deseja: %s ? Digite %d\n",s[i],i);
 	scanf("%s", le);
 	acao = (Acao	) atoi(le);
+	*/
+	// versão AI
+	
 	printf("acao escolhida: %s\n", s[acao]);
 	return acao;
 }
