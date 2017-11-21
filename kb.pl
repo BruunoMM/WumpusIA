@@ -60,10 +60,10 @@ adjacente(I,J,I2,J2) :-
 
 visitado(3,4).
 visitado(3,5).
-visitado(3,6).
+%visitado(3,6).
 percepcao(3,4,0,0,1,0,0).
 percepcao(3,5,0,1,0,0,0).
-percepcao(3,6,0,1,1,0,0).
+%percepcao(3,6,0,1,1,0,0).
 
 /*
 alguns algoritmos para determinar melhor acao
@@ -82,10 +82,12 @@ Mesmo não sabendo onde começou no mapa, o agente assume que começou em 0,0. P
 
 */
 
+%indica se a posição I, J é perigosa
 emPerigo(I,J) :-
 	brisa(I,J);
 	cheiro(I,J).
 
+%retorna em I2, J2 a localização exatamente a frente de I,J seguind a orientacao O
 emFrente(I,J,O,I2,J2) :- 
 	O = 0 -> format("O = 0~n",[]), J2 = J, I2 is I-1;
 	O = 1 -> format("O = 1~n",[]), I2 = I, J2 is J+1;
@@ -93,7 +95,6 @@ emFrente(I,J,O,I2,J2) :-
 	O = 3 -> format("O = 3~n",[]), I2 = I, J2 is J-1.
 
 /*
-
 MoverFrente,
 VirarDireita,
 VirarEsquerda,
@@ -102,25 +103,33 @@ AtirarFlecha,
 Subir
 */
 
+/*
 
-%transformar isso em escolher proxima acao
+3,4 conhecido
+ele esta em 3,5
+esta em perigo,
+olhando para a direita
+deveria virar duas vezes
+e ir para 3,4.
+
+*/
+
+%escolher proxima acao
 %I,J posicao na matriz
 %O orientaçao
 %X acao retornada
-
-
 melhorAcao(I, J, O, X) :-
 	emFrente(I, J, O, A, B),
 	format("A:~p, B:~p~n",[A,B]),
 	(
 		brilho(I,J) -> format("melhor acao pegar", []), X=3;
-		emFrente(A,B), visitado(A,B), emPerigo(I,J) ->  % caso em perigo, ir para lugar conhecido
+		emFrente(I,J,O,A,B), visitado(A,B), emPerigo(I,J) ->  % caso em perigo, ir para lugar conhecido
 			format("melhor acao avancar", []), X=0; % se na frente for conhecido, ir para frente
-		emFrente(A,B), \+ visitado(A,B), emPerigo(I,J)  -> %se na frente não é conhecido, virar a direita.
+		emFrente(I,J,O,A,B), \+ visitado(A,B), emPerigo(I,J)  -> %se na frente não é conhecido, virar a direita.
 			format("melhor acao virar direita", []), X=1;
-		emFrente(A,B), \+ emPerigo(I,J), (visitado(A,B) ; ehParede(A,B)) -> % nao esta em perigo, melhor acao avancar para lugar desconhecido.
+		emFrente(I,J,O,A,B), \+ emPerigo(I,J), (visitado(A,B) ; ehParede(A,B)) -> % nao esta em perigo, melhor acao avancar para lugar desconhecido.
 			format("melhor acao virar direita", []), X=1; % vira a direita se a frente ja for conhecido.
-		emFrente(A,B), \+ emPerigo(I,J), \+ visitado(A,B) , \+ ehParede(A,B) -> %nao esta em perigo, prioridade é desbravar o desconhecido
+		emFrente(I,J,O,A,B), \+ emPerigo(I,J), \+ visitado(A,B) , \+ ehParede(A,B) -> %nao esta em perigo, prioridade é desbravar o desconhecido
 			format("melhor acao avancar ", X=0);
 		format("do nothing", [])
 	).
