@@ -5,6 +5,7 @@
 #include "map.h"
 #include "agente.h"
 
+//coloca agente no mapa, chamada no inicio do jogo
 void add_agente(){
 	agente.vida = 100;
 	agente.municao = 5;
@@ -16,15 +17,17 @@ void add_agente(){
 	avisaProlog(agente.pos);
 }
 
+//avisa ao prolog que um inimigo foi atingido por uma flecha
 void grito(){
-	printf("grawwwrrr! O agente acertou alguem. Avisar prolog\n");
+	printf("grawwwrrr! O agente acertou alguem.\n");
 }
 
 void fimDeJogo(int status){
 	if(status == WIN)
-		printf("parabens voce venceu!\n");
+		printf("\n\nParabens voce venceu!\n");
 	else
-		printf("Que pena voce morreu..");
+		printf("\n\nQue pena voce morreu..");
+	printf("Pontuacao alcançada: %d\n", agente.pontos);
 	scanf(" %*s");
 	exit(1);
 }
@@ -58,6 +61,7 @@ void agenteMove(Pos *pos){
 	if(cell->poco){
 		printf("Agente cai no poco\n");
 		agente.pontos -= 1000;
+		fimDeJogo(LOSE);
 	}
 	avisaProlog(*pos);
 }
@@ -81,7 +85,7 @@ void posNaFrente(Pos *pos){
 	}
 }
 
-//Se um inimigo for abatido, o cheiro dele precisa desaparacer dos arredores.
+//Se um inimigo for abatido, o cheiro dele precisa desaparecer dos arredores.
 //Essa função checa se ao redor de pos ainda tem algum inimigo, se não houver mais nenhum, ela cessa o cheiro nessa posição.
 //essa posição deve ser chamada nas quatro posições adjacentes a um inimigo recem abatido
 void checaCheiro(Pos *pos){
@@ -112,7 +116,7 @@ void checaCheiro(Pos *pos){
 		mapa[pos->i][pos->j].cheiro = true;
 }
 
-//atira flecha a partir da posição do agente, verifica cada cell em linha reta, seguindo a aorientação do agente.
+//atira flecha a partir da posição do agente, verifica cada cell em linha reta, seguindo a orientação do agente.
 //para ao encontrar ou um inimigo, ou uma parede
 void atirarFlecha(){
 	Pos posCheca;
@@ -173,8 +177,9 @@ melhorAcao(I, J, O, X) :-
 */
 
 //pede uma ação para o prolog, retorna como enum
-Acao pedirAcao(){
+Acao pedirAcao(FILE *log){
 	char s[][20] = {"MoverFrente","VirarDireita", "VirarEsquerda", "PegarObjeto", "AtirarFlecha", "Subir"};
+	char orientacaoS[] = "NESW";
 	char *returnString = NULL;
 	char arg[81];
 	Acao acao;
@@ -186,6 +191,8 @@ Acao pedirAcao(){
 	size_t tam;
 	int i;
 	int returnInteger=0;
+
+	Cell *c = &mapa[agente.pos.i][agente.pos.j];
 
 	// versão AI	
 
@@ -203,8 +210,21 @@ Acao pedirAcao(){
 	acao = (Acao) returnInteger;
 	Sprintf("A melhor solucao lida do prolog e: %d\n", returnInteger);
 	PL_cut_query(qid);
-	
 
+	//gravando em log
+	fprintf(log, "i:%d j:%d orientacao:%c, %s poco, %s brisa, %s brilho, %s cheiro, %s wumpus -> %s\n",
+		agente.pos.i,
+		agente.pos.j,
+		orientacaoS[agente.orientacao],
+		c->poco?"":"sem",
+		c->brisa?"":"sem",
+		c->brilho?"":"sem",
+		c->cheiro?"":"sem",
+		c->wumpus?"":"sem",
+		s[acao]
+	);
+	fflush(log);
+	
 	/* versão jogavel------------------------
 	char le[81];
 	int i;
@@ -217,11 +237,12 @@ Acao pedirAcao(){
 	printf("acao escolhida: %s\n", s[acao]);
 	return acao;
 }
+
+//envia para o prolog a percepção na posição indicada
 void avisaProlog(Pos pos){
 	predicate_t p;
 	term_t t0;
 	term_t t;
-	//char arg[81];
 	int qid;
 	int rval;
 	Cell *cell;
@@ -252,35 +273,7 @@ void avisaProlog(Pos pos){
 
 	rval = PL_put_integer(t, cell->wumpus?1:0);
 	Sprintf("%d\n", t0+6);
-/*
-	sprintf(arg, "%d", pos.i);
-	printf("%s - ", arg);
-	PL_put_atom_chars(t++, arg);
 
-	sprintf(arg, "%d", pos.j);	
-	printf("%s - ", arg);
-	PL_put_atom_chars(t++, arg);
-
-	sprintf(arg, "%d", cell->poco?1:0);	
-	printf("%s - ", arg);
-	PL_put_atom_chars(t++, arg);
-
-	sprintf(arg, "%d", cell->brisa?1:0);	
-	printf("%s - ", arg);
-	PL_put_atom_chars(t++, arg);
-
-	sprintf(arg, "%d", cell->brilho?1:0);	
-	printf("%s - ", arg);
-	PL_put_atom_chars(t++, arg);
-
-	sprintf(arg, "%d", cell->cheiro?1:0);	
-	printf("%s - ", arg);
-	PL_put_atom_chars(t++, arg);
-
-	sprintf(arg, "%d", cell->wumpus?1:0);	
-	printf("%s - ", arg);
-	PL_put_atom_chars(t, arg);
-*/
 	qid = PL_open_query(NULL, PL_Q_NORMAL, p, t0);
 	rval = PL_next_solution(qid);
 	PL_cut_query(qid);
@@ -308,7 +301,7 @@ void removeOuro(Pos pos){
 	chamaProlog("removeOuro", pos);
 }
 
-//tenta executar a ação, retorna se foi possivel ou não.
+//tenta executar a ação.
 //se não for possivel, o agente não executa a ação.
 void executarAcao(Acao acao){
 	Pos pos;

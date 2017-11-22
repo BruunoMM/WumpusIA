@@ -6,12 +6,19 @@
 #include "agente.h"
 
 int main(int argc, char *argv[]){
+	FILE *log;
 	char *args[2];
 	Acao acao;
 	int seed = time(NULL);
 	srand(seed);
-	printf("seed usado: %d\n", seed);
+	printf("seed usado: %d\n", seed);	
 	
+	log = fopen("log.txt","wt");
+	if(!log){
+		printf("erro ao abrir arquivo de saida\n");
+		exit(-1);
+	}
+
 	args[0] = argv[0];
 	args[1] = NULL;
 	if(!PL_initialise(argc, args)){
@@ -25,9 +32,10 @@ int main(int argc, char *argv[]){
 		printf("Pontos: %d\n", agente.pontos);
 		desenhaMapa();
 		scanf("%*s");
-		acao = pedirAcao();
+		acao = pedirAcao(log);
 		executarAcao(acao);
 	}
+	fclose(log);
 	printf("fim\n");
 	return 0;
 }

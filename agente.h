@@ -51,9 +51,9 @@ void atirarFlecha();
 
 //Copia os valores de pos source para pos destiny
 void copyPos(Pos *dest, Pos *src);
-//TODO pede uma ação para o prolog, retorna como enum
-Acao pedirAcao();
-//TODO conta para o prolog qual a situação do quadrado atual. chamada quando o agente se move para um novo quadrado
+//pede uma ação para o prolog, retorna como enum
+Acao pedirAcao(FILE *log);
+//conta para o prolog qual a situação do quadrado atual. chamada quando o agente se move para um novo quadrado
 void avisaProlog();
 
 //tenta executar a ação, retorna se foi possivel ou não.

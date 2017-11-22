@@ -66,29 +66,6 @@ int add_gold() {
 		agentAdj = true;	// se o wumpus for adicionado num espaço adjacente ao espaço inicial do agente, ja que o agente nao pode ficar preso entre 2 poços.
 	return 0;
 }
-/*
-int add_wumpus() {
-	Pos pos;
-
-//	srand(time(NULL));
-	do {
-		pos.i = rand() % MAP_SIZE;
-		pos.j = rand() % MAP_SIZE;
-	} while ((pos.i == 0 && pos.j == 0) || isGold(pos)); // escolho novamente, caso o wumpus caia no espaço inicial do agente.
-	#ifdef _DEBUG
-		printf("Wumpus Posicao: %d\t%d\n", pos.i, pos.j);
-	#endif
-	mapa[pos.i][pos.j].wumpus = true;
-	mapa[pos.i - 1][pos.j].cheiro = true;
-	mapa[pos.i + 1][pos.j].cheiro = true;
-	mapa[pos.i][pos.j - 1].cheiro = true;
-	mapa[pos.i][pos.j + 1].cheiro = true;
-
-	if ((pos.i == 0 && pos.j == 1) || (pos.i == 1 && pos.j == 0))
-		agentAdj = true;	// se o wumpus for adicionado num espaço adjacente ao espaço inicial do agente, ja que o agente nao pode ficar preso entre 2 poços.
-	return 0;
-}
-*/
 int add_pit() {
 	Pos pos;
 
@@ -126,9 +103,7 @@ int add_enemy(int tipoInimigo) {
 	#ifdef _DEBUG
 		printf("Inimigos Posicao: %d\t%d\n", pos.i, pos.j);
 	#endif
-	//mapa[pos.i][pos.j].inimigo = (Inimigo*)malloc(sizeof(Inimigo));
-	//if (mapa[pos.i][pos.j].inimigo == NULL)
-	//	return 1; // erro de memoria
+
 	if (tipoInimigo == 0){
 		mapa[pos.i][pos.j].inimigo.ataque = 1000;	// wumpus
 		mapa[pos.i][pos.j].wumpus = true;
@@ -188,10 +163,12 @@ void inicializaMapa() {
 void desenhaMapa(){	
 	int i, e;
 	char agenteNoMapa[] = "^>V<";
+	//desenhando a linha no inicio
 	printf("/");
 	for(i=0;i<MAP_SIZE-1;i++)
 		printf("--------");
 	printf("-------\\\n");
+	//desenhando os quadrados do mapa
 	for (i = 0;i < MAP_SIZE;i++) {
 		printf("|");
 		for (e = 0;e < MAP_SIZE;e++) {
