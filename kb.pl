@@ -155,7 +155,7 @@ melhorAcao(I, J, O, X) :-
 		olhaEmVoltaNao(I,J) ->
 			format("melhor acao ir frente, pois nao tem para onde ir", []),
 			X=1;
-		)
+		);
 	%else
 	\+ emPerigo(I,J) -> (  % caso não esteja em perigo, ir para lugar desconhecido, a nao ser que todos sejam conhecidos
 		format("nao esta em perigo", []);
@@ -168,7 +168,7 @@ melhorAcao(I, J, O, X) :-
 		olhaEmVolta(I,J) ->
 			format("melhor acao ir frente, pois nao tem para onde ir", []),
 			X=1;
-		)
+		);
 	/*
 	emFrente(I,J,O,A,B), \+ visitado(A,B), emPerigo(I,J)  -> %se na frente não é conhecido, virar a direita.
 		format("melhor acao virar direita", []), X=1;
